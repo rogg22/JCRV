@@ -5,4 +5,6 @@ int Player_WallCollision(float player_x, float player_y, float player_height, fl
 int AI_WallCollision(float ai_x, float ai_y, float ai_height, float ai_width, float wall_x, float wall_y, float wall_height, float wall_thickness);
 int PlayerExit(float player_x, float player_y, float player_height, float player_width, float exit_x, float exit_y, float exit_height, float exit_width);
 int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c2_y, float r2);
+float collidex(float x, int direction, float rectx, float rectw, float s, float delt);
+float collidey(float y, int direction, float recty, float recth, float s, float delt);
 //float AreCirclesIntersecting(float ai_x, float ai_y, float r1, float player_x, float player_y, float r2);

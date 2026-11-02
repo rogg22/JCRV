@@ -35,18 +35,41 @@ int IsPlayerInRange(float ai_x, float ai_y, float detect_range, float player_x, 
 	}
 }
 
-int Player_WallCollision(float player_x, float player_y, float player_height, float player_width, float wall_one_x, float wall_one_y, float wall_height, float wall_thickness)
+int Player_WallCollision(float player_x, float player_y, float player_width, float player_height, float wall_one_x, float wall_one_y, float wall_height, float wall_thickness)
 {
-	int padding = 5;
-	if (player_x <= wall_one_x + wall_thickness + padding && player_x + player_width + padding >= wall_one_x && player_y + player_height + padding >= wall_one_y && player_y - padding<= wall_one_y + wall_height)
-	{
+	//int padding = 5;
+	//player AABB
+	float playerminx = player_x;
+	float playerminy = player_y;
+	float playermaxx = player_x + player_width;
+	float playermaxy = player_y + player_height;
+	//wall AABB
+	float wallminx = wall_one_x;
+	float wallminy = wall_one_y;
+	float wallmaxx = wall_one_x + wall_thickness;
+	float wallmaxy = wall_one_y + wall_height;
+
+	if ((playerminx <= wallmaxx && playermaxx >= wallminx) && (playerminy <= wallmaxy && playermaxy >= wallminy)) {
 		return 1;
 	}
-	else
-	{
+	else {
 		return 0;
 	}
+
 }
+
+//int Player_WallCollision(float player_x, float player_y, float player_height, float player_width, float wall_one_x, float wall_one_y, float wall_height, float wall_thickness)
+//{
+//	int padding = 5;
+//	if (player_x <= wall_one_x + wall_thickness + padding && player_x + player_width + padding >= wall_one_x && player_y + player_height + padding >= wall_one_y && player_y - padding<= wall_one_y + wall_height)
+//	{
+//		return 1;
+//	}
+//	else
+//	{
+//		return 0;
+//	}
+//}
 
 int PlayerExit(float player_x, float player_y, float player_height, float player_width, float exit_x, float exit_y, float exit_height, float exit_width)
 {
@@ -73,7 +96,6 @@ int AI_WallCollision(float ai_x, float ai_y, float ai_height, float ai_width, fl
 	}
 }
 
-
 int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c2_y, float r2)
 //float AreCirclesIntersecting(float ai_x, float ai_y, float r1, float player_x, float player_y, float r2)
 {
@@ -97,4 +119,39 @@ int AreCirclesIntersecting(float c1_x, float c1_y, float r1, float c2_x, float c
 	//{
 		//return 0;
 	//}
+}
+
+float collidex(float x, int direction, float rectx, float rectw, float s, float delt) {
+	float minx = rectx;
+	float maxx = rectx + rectw;
+	if (x < maxx && direction == 0) {
+		return (-s * delt);
+	}
+	//x-w/2
+	else if (x > minx && direction == 180) {
+		return (s * delt);
+	}
+	else {
+		return 0;
+	}
+}
+
+float collidey(float y, int direction, float recty, float recth, float s, float delt) {
+	float miny = recty;
+	float maxy = recty - recth;
+	//not working
+	if (y > maxy && direction == 270) {
+		//CP_Font_DrawText("bottom wall", (float)CP_System_GetWindowWidth() / 2, (float)CP_System_GetWindowHeight() / 1.83);
+		return(s * delt);
+	}
+	//colliding top
+	//y-h/2
+	else  if (y < miny && direction == 90) {
+		//CP_Font_DrawText("top wall", (float)CP_System_GetWindowWidth() / 2, (float)CP_System_GetWindowHeight() / 1.83);
+		return(-s * delt);
+	}
+	else {
+		//CP_Font_DrawText("None", (float)CP_System_GetWindowWidth() / 2, (float)CP_System_GetWindowHeight() / 1.83);
+		return 0;
+	}
 }
