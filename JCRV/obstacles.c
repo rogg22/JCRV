@@ -1,93 +1,92 @@
+#include <math.h>
 #include "cprocessing.h"
 #include "obstacles.h"
+#include "utils.h"
 
-//Trap
-void draw_obstacle_trap(float trap_x, float trap_y, float trapWidth, float trapHeight) {
-	CP_Color trapColor = CP_Color_Create(150, 110, 110, 255); //Trap color
-	CP_Settings_RectMode(CP_POSITION_CENTER);
-	CP_Settings_Fill(trapColor);
-	CP_Graphics_DrawRect(trap_x, trap_y, trapWidth, trapHeight);
+static float degree = 0.0f;
+
+int ScreenCheck(float x, float y, float wallx, float wally, float buffer) {
+	if (x >= wallx - buffer) {
+		return 1;
+	}
+	else if (x <= 0 + buffer) {
+		return 1;
+	}
+	else if (y - buffer <= wally) {
+		return 1;
+	}
+	else if (0 + buffer >= y) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+void draw_key(CP_Image key, float key_x, float key_y) {
+	CP_Settings_ImageMode(CP_POSITION_CORNER);
+	CP_Image_Draw(key, key_x, key_y, KEY_SIZE, KEY_SIZE, 255);
 }
 
 //Printer
-void draw_obstacle_printer(float printer_x, float printer_y, float printerWidth, float printerHeight) {
-	CP_Color printerColor = CP_Color_Create(50, 200, 100, 255); //Trap color
-	CP_Settings_RectMode(CP_POSITION_CENTER);
-	CP_Settings_Fill(printerColor);
-	CP_Graphics_DrawRect(printer_x, printer_y, printerWidth, printerHeight);
+void draw_obstacle_printer(CP_Image printer, float printer_x, float printer_y) {
+	CP_Settings_ImageMode(CP_POSITION_CENTER);
+	if (degree < 0.f) {
+		degree = 0.f;
+	}
+	if (degree >= 0.f && degree <= 360.f) {
+		degree += 1.5f;
+	}
+	if (degree >= 360.f) {
+		degree = 0.f;
+	}
+	CP_Image_DrawAdvanced(printer, printer_x, printer_y, PRINTER_SIZE, PRINTER_SIZE, 255, degree);
+	CP_Settings_ImageMode(CP_POSITION_CORNER);
 }
 
-//Printer
-void draw_printer_ammo(float printer_x, float printer_y, float printerWidth, float printerHeight) {
-	CP_Color printerColor = CP_Color_Create(50, 200, 100, 255); //Trap color
-	CP_Settings_RectMode(CP_POSITION_CENTER);
-	CP_Settings_Fill(printerColor);
-	CP_Graphics_DrawRect(printer_x + printerWidth, printer_y, printerWidth, printerHeight);
+float return_degree(void) {
+	return degree;
 }
 
-//Main menu buttons
-int IsAreaClicked(float area_center_x, float area_center_y, float area_width, float area_height, float click_x, float click_y)
+float return_radian_x(void) {
+	float radian = (degree * (3.14159f / 180.f));
+	return cosf(radian);
+}
+
+float return_radian_y(void) {
+	//y angle
+	float radian = 90 - (degree * (3.14159f / 180.f));
+	return cosf(radian);
+}
+
+//Printer ammo
+void draw_printer_ammo(float printerAmmo_x, float printerAmmo_y, float printerAmmoWidth, float printerAmmoHeight) {
+	CP_Color printerColor = CP_Color_Create(50, 200, 100, 255); //Trap color
+	CP_Settings_Fill(printerColor);
+	CP_Graphics_DrawRect(printerAmmo_x, printerAmmo_y, printerAmmoWidth, printerAmmoHeight);
+	CP_Settings_RectMode(CP_POSITION_CORNER);
+}
+
+//Stapler trap hitbox with player
+int AreBoxesIntersecting(float player_x, float player_y, float trap_x, float trap_y)
 {
-	float half_width = area_width / 2.0f;
-	float half_height = area_height / 2.0f;
-
-	float left = area_center_x - half_width;
-	float right = area_center_x + half_width;
-	float up = area_center_y - half_height;
-	float down = area_center_y + half_height;
-
-	if (click_x >= left && click_x <= right && click_y >= up && click_y <= down)
-	{
+	if (player_x < trap_x + 25.0f && player_x + 50.0f > trap_x && player_y < trap_y + 30.0f && player_y + 45.0f > trap_y) {
 		return 1;
 	}
 	return 0;
 }
 
-//Stapler trap hitbox
-int AreBoxesIntersecting(float box_center_x, float box_center_y, float box_width, float box_height, float trap_center_x, float trap_center_y, float trap_width, float trap_height)
+int PrinterIntersecting(float player_x, float player_y, float printer_x, float printer_y)
 {
-	float half_width = box_width / 2.0f;
-	float half_height = box_height / 2.0f;
-
-	float half_width2 = trap_width / 2.0f;
-	float half_height2 = trap_height / 2.0f;
-
-	float dx = box_center_x - trap_center_x;
-	float dy = box_center_y - trap_center_y;
-
-	if (dx < 0) {
-		dx = -dx;
-	}
-	if (dy < 0) {
-		dy = -dy;
-	}
-
-	if (dx <= half_width + half_width2 && dy <= half_height + half_height2) {
+	if (player_x < printer_x + 55.0f && player_x + PLAYER_SIZE > printer_x && player_y < printer_y + 50.0f && player_y + PLAYER_SIZE > printer_y) {
 		return 1;
 	}
 	return 0;
 }
 
-//Printer hitbox
-int PrinterIntersecting(float box_center_x, float box_center_y, float box_width, float box_height, float printer_center_x, float printer_center_y, float printer_width, float printer_height)
+int KeyIntersecting(float player_x, float player_y, float heal_x, float heal_y)
 {
-	float half_width = box_width / 2.0f;
-	float half_height = box_height / 2.0f;
-
-	float half_width2 = printer_width / 2.0f;
-	float half_height2 = printer_height / 2.0f;
-
-	float dx = box_center_x - printer_center_x;
-	float dy = box_center_y - printer_center_y;
-
-	if (dx < 0) {
-		dx = -dx;
-	}
-	if (dy < 0) {
-		dy = -dy;
-	}
-
-	if (dx <= half_width + half_width2 && dy <= half_height + half_height2) {
+	if (player_x < heal_x + 45.0f && player_x + 45.0f > heal_x && player_y < heal_y + 50.0f && player_y + 50.0f > heal_y) {
 		return 1;
 	}
 	return 0;
